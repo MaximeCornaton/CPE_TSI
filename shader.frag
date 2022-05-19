@@ -1,8 +1,9 @@
 #version 330 core
 
+uniform vec4 c;
+
 // Variable de sortie (sera utilisé comme couleur)
 out vec4 color;
-uniform vec4 c;
 
 //Un Fragment Shader minimaliste
 void main (void)

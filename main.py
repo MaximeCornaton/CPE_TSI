@@ -112,8 +112,11 @@ def run(window):
     g=0
     b=0
 
-    rot3 = pyrr.matrix33.create_from_z_rotation(np.pi/2)
-    rot4 = pyrr.matrix44.create_from_matrix33(rot3)
+    angx = 0
+    angy = 0
+
+    angproj = 50
+    distproj = 5
 
     # boucle d'affichage
     while not glfw.window_should_close(window):
@@ -121,11 +124,11 @@ def run(window):
         GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
         #  l'affichage se fera ici
-        if glfw.get_time() < 1:
+        """ if glfw.get_time() < 1:
             GL.glClearColor(glfw.get_time(), glfw.get_time(), glfw.get_time(), 1.0)
-        GL.glPointSize(5.0)
+        """
         GL.glDrawArrays(GL.GL_TRIANGLES, 0, 3)
-
+        #GL.glPointSize(5.0) 
         #GL.glDrawArrays(GL.GL_POINTS, 0, 3)
         #GL.glDrawArrays(GL.GL_LINE_LOOP, 0, 3)
 
@@ -136,22 +139,41 @@ def run(window):
         loc = GL.glGetUniformLocation(prog, "translation")
         loc_color = GL.glGetUniformLocation(prog, "c")
         loc_rotation = GL.glGetUniformLocation(prog, "rotation")
+        loc_projection = GL.glGetUniformLocation(prog, "projection")
 
         # Vérifie que les variables existent
         if loc == -1 :
             print("Pas de variable uniforme : translation")
         if loc_color == -1 :
             print("Pas de variable uniforme : c")
+        if loc_rotation == -1 :
+            print("Pas de variable uniforme : rotation")
+        if loc_projection == -1 :
+            print("Pas de variable uniforme : rotation")
 
-
+        #Appliquer les parametres
         if keys_[glfw.KEY_RIGHT] > 0:
-            x += 0.01
+            x += 0.05
         if keys_[glfw.KEY_LEFT] > 0:
-            x -= 0.01
+            x -= 0.05
         if keys_[glfw.KEY_UP] > 0:
-            y += 0.01
+            y += 0.05
         if keys_[glfw.KEY_DOWN] > 0:
-            y -= 0.01
+            y -= 0.05
+
+        if keys_[glfw.KEY_I] > 0:
+            angx += 0.05*(np.pi)
+        if keys_[glfw.KEY_J] > 0:
+            angx -= 0.05*(np.pi)
+        if keys_[glfw.KEY_K] > 0:
+            angy += 0.05*(np.pi)
+        if keys_[glfw.KEY_L] > 0:
+            angy -= 0.05*(np.pi)
+        
+        rotx3 = pyrr.matrix33.create_from_x_rotation(angx) 
+        roty3 = pyrr.matrix33.create_from_y_rotation(angy)
+        rotx4 = pyrr.matrix44.create_from_matrix33(rotx3)
+        roty4 = pyrr.matrix44.create_from_matrix33(roty3)
 
         if keys_[glfw.KEY_R] > 0:
             r = 1
@@ -165,12 +187,21 @@ def run(window):
             r = 0
             g = 0
             b = 1
+        
+        if keys_[glfw.KEY_Y] > 0:
+            distproj = 0.5
+        if keys_[glfw.KEY_H] > 0:
+            distproj = 10
             
         # Mise a jour des positions et couleurs
         GL.glUniform4f(loc, x, y, 0, 0)
         GL.glUniform4f(loc_color, r, g, b, 0)
-        GL.glUniformMatrix4fv(loc_rotation, 1, GL.GL_FALSE, rot4)
+        GL.glUniformMatrix4fv(loc_rotation, 1, GL.GL_FALSE, rotx4+roty4)
+        
 
+        matproj4 = pyrr.matrix44.create_perspective_projection_matrix(50,1,0.5,10,None)
+        GL.glUniformMatrix4fv(loc_projection, 1, GL.GL_FALSE, matproj4)
+        
 
         # changement de buffer d'affichage pour eviter un effet de scintillement
         glfw.swap_buffers(window)
