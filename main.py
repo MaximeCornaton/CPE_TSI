@@ -149,7 +149,7 @@ def run(window):
         if loc_rotation == -1 :
             print("Pas de variable uniforme : rotation")
         if loc_projection == -1 :
-            print("Pas de variable uniforme : rotation")
+            print("Pas de variable uniforme : projection")
 
         #Appliquer les parametres
         if keys_[glfw.KEY_RIGHT] > 0:
