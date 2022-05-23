@@ -11,5 +11,5 @@ layout (location = 0) in vec3 position;
 void main (void)
 {
   //Coordonnees du sommet
-     gl_Position= ((vec4(position, 1.0) * rotation) + translation) * projection;
+    gl_Position =  projection * ((vec4(position, 1.0) * rotation) + translation);
 }

@@ -199,9 +199,9 @@ def run(window):
         GL.glUniformMatrix4fv(loc_rotation, 1, GL.GL_FALSE, rotx4+roty4)
         
 
-        matproj4 = pyrr.matrix44.create_perspective_projection_matrix(50.0,1.0,0.5,10.0)
+        matproj4 = pyrr.matrix44.create_perspective_projection_matrix(50.0,1.0,0.5,10.0, None)
         GL.glUniformMatrix4fv(loc_projection, 1, GL.GL_FALSE, matproj4)
-        
+    
 
         # changement de buffer d'affichage pour eviter un effet de scintillement
         glfw.swap_buffers(window)
