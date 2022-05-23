@@ -199,7 +199,7 @@ def run(window):
         GL.glUniformMatrix4fv(loc_rotation, 1, GL.GL_FALSE, rotx4+roty4)
         
 
-        matproj4 = pyrr.matrix44.create_perspective_projection_matrix(50,1,0.5,10,None)
+        matproj4 = pyrr.matrix44.create_perspective_projection_matrix(50.0,1.0,0.5,10.0)
         GL.glUniformMatrix4fv(loc_projection, 1, GL.GL_FALSE, matproj4)
         
 
