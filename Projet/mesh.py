@@ -93,7 +93,6 @@ class Mesh():
                     f1 = l[1].split('/')
                     f2 = l[2].split('/')
                     f3 = l[3].split('/')
-                    print(f1)
                     vi.append(np.array([f1[0], f2[0], f3[0]], np.uint32))
                     if len(f3) > 1 :   
                         vti.append(np.array([f1[1], f2[1], f3[1]], np.uint32))
