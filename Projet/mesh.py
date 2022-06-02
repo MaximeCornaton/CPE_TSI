@@ -93,6 +93,7 @@ class Mesh():
                     f1 = l[1].split('/')
                     f2 = l[2].split('/')
                     f3 = l[3].split('/')
+                    print(f1)
                     vi.append(np.array([f1[0], f2[0], f3[0]], np.uint32))
                     if len(f3) > 1 :   
                         vti.append(np.array([f1[1], f2[1], f3[1]], np.uint32))
@@ -102,6 +103,10 @@ class Mesh():
                         vni.append(np.array([f1[2], f2[2], f3[2]], np.uint32))
                     else :
                         vni.append(np.array([1, 1, 1], np.uint32))
+                elif l[0] == '#':
+                    print("comm")
+                elif l[0] == ' ':
+                    print("espace")
             if len(tmpvn) == 0:
                 tmpvn.append(np.array([0, 0, 0], np.float32))
             if len(tmpvt) == 0:
