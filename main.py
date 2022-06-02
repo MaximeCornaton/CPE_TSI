@@ -7,6 +7,8 @@ import numpy as np
 import random as rdm
 import pyrr
 
+from ctypes import *
+
 keys_ = {}
 
 def compile_shader(shader_content, shader_type):
@@ -67,18 +69,23 @@ def init_context(window):
     glfw.swap_interval(1)
     # activation de la gestion de la profondeur
     GL.glEnable(GL.GL_DEPTH_TEST)
+    #GL.glDisable(GL.GL_DEPTH_TEST)
     # choix de la couleur de fond
     GL.glClearColor(0.1, 0.9, 0.1, 1.0)
     print(f"OpenGL: {GL.glGetString(GL.GL_VERSION).decode('ascii')}")
 
 def init_program():
-    shader_id = create_program_from_file('shader.vert','shader.frag')
+    shader_id = create_program_from_file('phong.vert','phong.frag')
     GL.glUseProgram(shader_id)
 
         
 def init_data():
-    sommets = np.array(((0, 0, 0), (1, 0, 0), (0, 1, 0)), np.float32)
-    
+    sommets = np.array(((0, 0, 0),(0, 0, 1),
+                        (1, 0, 0), (-0.25, -0.25, 0.85),
+                        (0, 1, 0),(-0.25, -0.25, 0.85),
+                        (0.8, 0.8, 0.5) ,(-0.5,-0.5, 0.707)), np.float32)
+    index=np.array(((0, 1, 2), (0, 1, 3)), np.uint32)
+
     # attribution d'une liste d'état (1 indique la création d'une seule liste)
     vao = GL.glGenVertexArrays(1)
     # affectation de la liste d'état courante
@@ -91,13 +98,23 @@ def init_data():
     # copie des donnees des sommets sur la carte graphique
     GL.glBufferData(GL.GL_ARRAY_BUFFER, sommets, GL.GL_STATIC_DRAW)
 
+    # attribution d’un autre buffer de donnees
+    vboi = GL.glGenBuffers(1)
+    # affectation du buffer courant (buffer d’indice)
+    GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER,vboi)
+    # copie des indices sur la carte graphique
+    GL.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER,index,GL.GL_STATIC_DRAW)
+
+    sizefloat = sizeof(c_float())
+
     # Les deux commandes suivantes sont stockées dans l'état du vao courant
     # Active l'utilisation des données de positions
     # (le 0 correspond à la location dans le vertex shader)
     GL.glEnableVertexAttribArray(0)
     # Indique comment le buffer courant (dernier vbo "bindé")
     # est utilisé pour les positions des sommets
-    GL.glVertexAttribPointer(0, 3, GL.GL_FLOAT, GL.GL_FALSE, 0, None)
+    GL.glVertexAttribPointer(0, 3, GL.GL_FLOAT, GL.GL_FALSE, 2*3*sizefloat, None)
+    GL.glVertexAttribPointer(1, 3, GL.GL_FLOAT, GL.GL_FALSE, 2*3*sizefloat, c_void_p(3*sizefloat))
 
 
 def run(window):
@@ -107,6 +124,7 @@ def run(window):
 
     x=0
     y=0
+    z=-5
 
     r=0
     g=0
@@ -116,7 +134,6 @@ def run(window):
     angy = 0
 
     angproj = 50
-    distproj = 5
 
     # boucle d'affichage
     while not glfw.window_should_close(window):
@@ -127,7 +144,7 @@ def run(window):
         """ if glfw.get_time() < 1:
             GL.glClearColor(glfw.get_time(), glfw.get_time(), glfw.get_time(), 1.0)
         """
-        GL.glDrawArrays(GL.GL_TRIANGLES, 0, 3)
+        GL.glDrawElements(GL.GL_TRIANGLES, 2*3, GL.GL_UNSIGNED_INT, None)
         #GL.glPointSize(5.0) 
         #GL.glDrawArrays(GL.GL_POINTS, 0, 3)
         #GL.glDrawArrays(GL.GL_LINE_LOOP, 0, 3)
@@ -160,6 +177,11 @@ def run(window):
             y += 0.05
         if keys_[glfw.KEY_DOWN] > 0:
             y -= 0.05
+        if keys_[glfw.KEY_Y] > 0:
+            z += 0.05
+        if keys_[glfw.KEY_H] > 0:
+            z -= 0.05
+
 
         if keys_[glfw.KEY_I] > 0:
             angx += 0.05*(np.pi)
@@ -187,19 +209,14 @@ def run(window):
             r = 0
             g = 0
             b = 1
-        
-        if keys_[glfw.KEY_Y] > 0:
-            distproj = 0.5
-        if keys_[glfw.KEY_H] > 0:
-            distproj = 10
             
         # Mise a jour des positions et couleurs
-        GL.glUniform4f(loc, x, y, 0, 0)
+        GL.glUniform4f(loc, x, y, z, 0)
         GL.glUniform4f(loc_color, r, g, b, 0)
         GL.glUniformMatrix4fv(loc_rotation, 1, GL.GL_FALSE, rotx4+roty4)
         
 
-        matproj4 = pyrr.matrix44.create_perspective_projection_matrix(50.0,1.0,0.5,10.0, None)
+        matproj4 = pyrr.matrix44.create_perspective_projection_matrix(angproj,1.0,0.5,10.0, None)
         GL.glUniformMatrix4fv(loc_projection, 1, GL.GL_FALSE, matproj4)
     
 
