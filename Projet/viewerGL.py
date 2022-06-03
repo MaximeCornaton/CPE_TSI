@@ -21,7 +21,7 @@ class ViewerGL:
         glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
         # création et paramétrage de la fenêtre
         glfw.window_hint(glfw.RESIZABLE, False)
-        self.window = glfw.create_window(1200, 800, 'OpenGL', None, None)
+        self.window = glfw.create_window(self.profile.width, self.profile.height, 'Jeu', None, None)
         # paramétrage de la fonction de gestion des évènements
         glfw.set_key_callback(self.window, self.key_callback)
         # activation du context OpenGL pour la fenêtre
@@ -43,6 +43,8 @@ class ViewerGL:
             GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
             self.update_key() #On recupere les touches
+            if self.profile.get_game_mode() == True: #Si le jeu est en mode "jeu" 
+                self.camera_view(self.profile.get_camera_view_position()) #On uptade la camera en fonction de l'objet
 
             for obj in self.objs:
                 GL.glUseProgram(obj.program)
@@ -50,8 +52,6 @@ class ViewerGL:
                     self.update_camera(obj.program)
                 obj.draw()
             
-            if self.profile.get_game_mode() == True: #Si le jeu est en mode "jeu" 
-                self.camera_view(self.profile.get_camera_view_position()) #On uptade la camera en fonction de l'objet
 
             # changement de buffer d'affichage pour éviter un effet de scintillement
             glfw.swap_buffers(self.window)
@@ -112,20 +112,24 @@ class ViewerGL:
         self.cam.transformation.translation = self.objs[0].transformation.translation + pyrr.Vector3([x_distance, y_distance, z_distance]) #On met a jour le placement
 
     def update_key(self):
+        #Rotation
+        self.objs[0].transformation.rotation_euler[pyrr.euler.index().yaw] = self.mouse_rotation_step()
+
         #Deplacement 
-        if glfw.KEY_UP in self.touch and self.touch[glfw.KEY_UP] > 0:
+        keys_walk = self.profile.get_game_keys_walk() #For,Back,Left,Right
+        if keys_walk[0] in self.touch and self.touch[keys_walk[0]] > 0:
             self.objs[0].transformation.translation += \
                 pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_eulers(self.objs[0].transformation.rotation_euler), pyrr.Vector3([0, 0, self.profile.get_game_distance_step()]))
-        if glfw.KEY_DOWN in self.touch and self.touch[glfw.KEY_DOWN] > 0:
+        if keys_walk[1] in self.touch and self.touch[keys_walk[1]] > 0:
             self.objs[0].transformation.translation -= \
                 pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_eulers(self.objs[0].transformation.rotation_euler), pyrr.Vector3([0, 0, self.profile.get_game_distance_step()]))
+        if keys_walk[2] in self.touch and self.touch[keys_walk[2]] > 0:
+            self.objs[0].transformation.translation += \
+                pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_eulers(self.objs[0].transformation.rotation_euler), pyrr.Vector3([self.profile.get_game_distance_step(), 0, 0]))
+        if keys_walk[3] in self.touch and self.touch[keys_walk[3]] > 0:
+            self.objs[0].transformation.translation -= \
+                pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_eulers(self.objs[0].transformation.rotation_euler), pyrr.Vector3([self.profile.get_game_distance_step(), 0, 0]))
        
-        #Rotation
-        if glfw.KEY_LEFT in self.touch and self.touch[glfw.KEY_LEFT] > 0:
-            self.objs[0].transformation.rotation_euler[pyrr.euler.index().yaw] -= self.profile.get_game_angle_step()
-        if glfw.KEY_RIGHT in self.touch and self.touch[glfw.KEY_RIGHT] > 0:
-            self.objs[0].transformation.rotation_euler[pyrr.euler.index().yaw] += self.profile.get_game_angle_step()
-
         #Deplacement de camera
         if glfw.KEY_I in self.touch and self.touch[glfw.KEY_I] > 0:
             self.cam.transformation.rotation_euler[pyrr.euler.index().roll] -= 0.1
@@ -135,3 +139,18 @@ class ViewerGL:
             self.cam.transformation.rotation_euler[pyrr.euler.index().yaw] -= 0.1
         if glfw.KEY_L in self.touch and self.touch[glfw.KEY_L] > 0:
             self.cam.transformation.rotation_euler[pyrr.euler.index().yaw] += 0.1
+
+    def mouse_rotation_step(self):
+        #x,y = 0,0 en bas a gauche
+        (x_cursor,y_cursor) = glfw.get_cursor_pos(self.window)
+        tour = np.pi*2
+        width_screen = self.profile.width
+
+        rapport_de_rotation_largeur = tour*x_cursor/width_screen
+
+        #On centre le rapport:
+        rapport_de_rotation_largeur = rapport_de_rotation_largeur-tour/2
+        return rapport_de_rotation_largeur
+
+
+
