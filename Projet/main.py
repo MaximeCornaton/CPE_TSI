@@ -20,9 +20,8 @@ def main():
     m.normalize()
     m.apply_matrix(pyrr.matrix44.create_from_scale([2, 2, 2, 1])) #Taille de l'arme
     tr = Transformation3D() #Position initiale de l'objet
-    tr.translation.y = -np.amin(m.vertices, axis=0)[1]
-    tr.translation.z = -5
-    tr.rotation_center.z = 0.2
+    tr.translation.y = -np.amin(m.vertices, axis=0)[1] #On place l'objet au sol
+    tr.rotation_center.z = 0.2 #Centre de rotation de l'arme == Position par rapport a l'epaule
     texture = glutils.load_texture('assets/ak47tr.png')
     o = Object3D(m.load_to_gpu(), m.get_nb_triangles(), program3d_id, texture, tr)
     viewer.add_object(o)

@@ -5,9 +5,13 @@ import glfw
 import pyrr
 import numpy as np
 from cpe3d import Object3D
+from profile import Profile
 
 class ViewerGL:
     def __init__(self):
+        #Initialisation du profil joueur
+        self.profile = Profile()
+
         # initialisation de la librairie GLFW
         glfw.init()
         # paramétrage du context OpenGL
@@ -38,7 +42,7 @@ class ViewerGL:
             # nettoyage de la fenêtre : fond et profondeur
             GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
-            self.update_key()
+            self.update_key() #On recupere les touches
 
             for obj in self.objs:
                 GL.glUseProgram(obj.program)
@@ -46,7 +50,8 @@ class ViewerGL:
                     self.update_camera(obj.program)
                 obj.draw()
             
-            self.camera_view() #On uptade la camera
+            if self.profile.get_game_mode() == True: #Si le jeu est en mode "jeu" 
+                self.camera_view(self.profile.get_camera_view_position()) #On uptade la camera en fonction de l'objet
 
             # changement de buffer d'affichage pour éviter un effet de scintillement
             glfw.swap_buffers(self.window)
@@ -96,25 +101,32 @@ class ViewerGL:
             print("Pas de variable uniforme : projection")
         GL.glUniformMatrix4fv(loc, 1, GL.GL_FALSE, self.cam.projection)
 
-    def camera_view(self, x_distance = 0, y_distance = 1, z_distance = 5):
+    def camera_view(self, camera_view_position):
         #x,y,z parametre de positionnement de la camera par rapport a l'objet
+        x_distance = camera_view_position[0]
+        y_distance = camera_view_position[1]
+        z_distance = camera_view_position[2]
         self.cam.transformation.rotation_euler = self.objs[0].transformation.rotation_euler.copy() 
         self.cam.transformation.rotation_euler[pyrr.euler.index().yaw] += np.pi #On met la camera derriere l'objet
         self.cam.transformation.rotation_center = self.objs[0].transformation.translation + self.objs[0].transformation.rotation_center #On met a jour le centre de rotation
         self.cam.transformation.translation = self.objs[0].transformation.translation + pyrr.Vector3([x_distance, y_distance, z_distance]) #On met a jour le placement
 
     def update_key(self):
+        #Deplacement 
         if glfw.KEY_UP in self.touch and self.touch[glfw.KEY_UP] > 0:
             self.objs[0].transformation.translation += \
-                pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_eulers(self.objs[0].transformation.rotation_euler), pyrr.Vector3([0, 0, 0.02]))
+                pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_eulers(self.objs[0].transformation.rotation_euler), pyrr.Vector3([0, 0, self.profile.get_game_distance_step()]))
         if glfw.KEY_DOWN in self.touch and self.touch[glfw.KEY_DOWN] > 0:
             self.objs[0].transformation.translation -= \
-                pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_eulers(self.objs[0].transformation.rotation_euler), pyrr.Vector3([0, 0, 0.02]))
+                pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_eulers(self.objs[0].transformation.rotation_euler), pyrr.Vector3([0, 0, self.profile.get_game_distance_step()]))
+       
+        #Rotation
         if glfw.KEY_LEFT in self.touch and self.touch[glfw.KEY_LEFT] > 0:
-            self.objs[0].transformation.rotation_euler[pyrr.euler.index().yaw] -= 0.1
+            self.objs[0].transformation.rotation_euler[pyrr.euler.index().yaw] -= self.profile.get_game_angle_step()
         if glfw.KEY_RIGHT in self.touch and self.touch[glfw.KEY_RIGHT] > 0:
-            self.objs[0].transformation.rotation_euler[pyrr.euler.index().yaw] += 0.1
+            self.objs[0].transformation.rotation_euler[pyrr.euler.index().yaw] += self.profile.get_game_angle_step()
 
+        #Deplacement de camera
         if glfw.KEY_I in self.touch and self.touch[glfw.KEY_I] > 0:
             self.cam.transformation.rotation_euler[pyrr.euler.index().roll] -= 0.1
         if glfw.KEY_K in self.touch and self.touch[glfw.KEY_K] > 0:
