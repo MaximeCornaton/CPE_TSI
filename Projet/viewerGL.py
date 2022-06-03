@@ -114,9 +114,9 @@ class ViewerGL:
 
     def update_key(self):
         #Rotation
-        angle_de_rotation = self.mouse_rotation_step()
-        if isinstance(angle_de_rotation, float) :
-            self.objs[0].transformation.rotation_euler[pyrr.euler.index().yaw] += angle_de_rotation*self.profile.get_game_angle_sensibility()
+        [angle_de_rotation_y,angle_de_rotation_x] = self.mouse_rotation_step()
+        self.objs[0].transformation.rotation_euler[pyrr.euler.index().yaw] += angle_de_rotation_y*self.profile.get_game_angle_sensibility()
+        #self.objs[0].transformation.rotation_euler[pyrr.euler.index().roll] += angle_de_rotation_x*self.profile.get_game_angle_sensibility()
 
         #Deplacement 
         keys_walk = self.profile.get_game_keys_walk() #For,Back,Left,Right
@@ -137,20 +137,21 @@ class ViewerGL:
     def mouse_rotation_step(self):
         #x,y = 0,0 en bas a gauche
         (x_cursor,y_cursor) = glfw.get_cursor_pos(self.window)
-        rapport_de_rotation_largeur = False
+        rapport_de_rotation_largeur = 0
+        rapport_de_rotation_hauteur = 0
         
         if 0<x_cursor<self.profile.width and 0<y_cursor<self.profile.height:
             tour = np.pi*2
-            width_screen = self.profile.width
 
-            rapport_de_rotation_largeur = tour*x_cursor/width_screen
+            rapport_de_rotation_largeur = tour*x_cursor/self.profile.width
+            rapport_de_rotation_hauteur = tour*y_cursor/self.profile.height
 
             #On centre le rapport:
             rapport_de_rotation_largeur = rapport_de_rotation_largeur-tour/2
+            rapport_de_rotation_hauteur = rapport_de_rotation_hauteur-tour/2
         
         glfw.set_cursor_pos(self.window, self.profile.width/2, self.profile.height/2)
-
-        return rapport_de_rotation_largeur
+        return rapport_de_rotation_largeur, rapport_de_rotation_hauteur
 
 
 

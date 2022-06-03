@@ -13,15 +13,15 @@ class Profile:
         self.game_mode = 0 #On commence en mode de jeu/ 1 = Mode libre (on peut se deplacer sans suivre l'objet etc)/ 2=Pause?
         self.camera_view_position = [0,1,2] #Position de la camera par rapport a l'objet en mode jeu
 
-        self.true_distance_step = 0.25 #Distance de deplacement en mode jeu
+        self.true_distance_step = 0.15 #Distance de deplacement en mode jeu
         self.false_distance_step = 0.5 #Distance de deplacement en mode libre
 
         self.game_angle_sensibility = 0.5 #Sensibilité de rotation
 
-        self.game_forward_walk = glfw.KEY_Z
-        self.game_backward_walk = glfw.KEY_S
-        self.game_leftward_walk = glfw.KEY_Q
-        self.game_rightward_walk = glfw.KEY_D
+        self.game_forward_walk = glfw.KEY_E
+        self.game_backward_walk = glfw.KEY_D
+        self.game_leftward_walk = glfw.KEY_S
+        self.game_rightward_walk = glfw.KEY_F
 
     def get_camera_view_position(self):
     #Retourne la position de la camera par rapport a l'objet en mode jeu
