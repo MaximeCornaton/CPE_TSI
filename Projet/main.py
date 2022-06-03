@@ -16,14 +16,14 @@ def main():
     program3d_id = glutils.create_program_from_file('shader.vert', 'shader.frag')
     programGUI_id = glutils.create_program_from_file('gui.vert', 'gui.frag')
 
-    m = Mesh.load_obj('assets/AK47.obj')
+    m = Mesh.load_obj('assets/ak47.obj')
     m.normalize()
     m.apply_matrix(pyrr.matrix44.create_from_scale([2, 2, 2, 1])) #Taille de l'arme
-    tr = Transformation3D()
+    tr = Transformation3D() #Position initiale de l'objet
     tr.translation.y = -np.amin(m.vertices, axis=0)[1]
     tr.translation.z = -5
     tr.rotation_center.z = 0.2
-    texture = glutils.load_texture('assets/grass.jpg')
+    texture = glutils.load_texture('assets/ak47tr.png')
     o = Object3D(m.load_to_gpu(), m.get_nb_triangles(), program3d_id, texture, tr)
     viewer.add_object(o)
 

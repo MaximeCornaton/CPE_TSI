@@ -102,10 +102,10 @@ class Mesh():
                         vni.append(np.array([f1[2], f2[2], f3[2]], np.uint32))
                     else :
                         vni.append(np.array([1, 1, 1], np.uint32))
-                elif l[0] == '#':
-                    print("comm")
-                elif l[0] == ' ':
-                    print("espace")
+                # elif l[0] == '#':
+                #     print("comm")
+                # elif l[0] == ' ':
+                #     print("espace")
             if len(tmpvn) == 0:
                 tmpvn.append(np.array([0, 0, 0], np.float32))
             if len(tmpvt) == 0:
