@@ -25,6 +25,7 @@ class ViewerGL:
         glfw.set_input_mode(self.window, glfw.CURSOR, glfw.CURSOR_HIDDEN) #on cache le curseur
         # paramétrage de la fonction de gestion des évènements
         glfw.set_key_callback(self.window, self.key_callback)
+        glfw.set_mouse_button_callback(self.window, self.mouse_callback)
         # activation du context OpenGL pour la fenêtre
         glfw.make_context_current(self.window)
         glfw.swap_interval(1)
@@ -64,6 +65,9 @@ class ViewerGL:
         if key == glfw.KEY_ESCAPE and action == glfw.PRESS:
             glfw.set_window_should_close(win, glfw.TRUE)
         self.touch[key] = action
+
+    def mouse_callback(self,win, button, action, mods):
+        self.touch[button] = action
     
     def add_object(self, obj):
         self.objs.append(obj)
@@ -104,9 +108,7 @@ class ViewerGL:
 
     def camera_view(self, camera_view_position):
         #x,y,z parametre de positionnement de la camera par rapport a l'objet
-        x_distance = camera_view_position[0]
-        y_distance = camera_view_position[1]
-        z_distance = camera_view_position[2]
+        [x_distance, y_distance, z_distance] = camera_view_position
         self.cam.transformation.rotation_euler = self.objs[0].transformation.rotation_euler.copy() 
         self.cam.transformation.rotation_euler[pyrr.euler.index().yaw] += np.pi #On met la camera derriere l'objet
         self.cam.transformation.rotation_center = self.objs[0].transformation.translation + self.objs[0].transformation.rotation_center #On met a jour le centre de rotation
@@ -133,6 +135,10 @@ class ViewerGL:
             self.objs[0].transformation.translation -= \
                 pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_eulers(self.objs[0].transformation.rotation_euler), pyrr.Vector3([self.profile.get_game_distance_step(), 0, 0]))
        
+        #Tir
+        if self.profile.get_game_shoot() in self.touch and self.touch[self.profile.get_game_shoot()] > 0:
+            print("tir")
+
 
     def mouse_rotation_step(self):
         #x,y = 0,0 en bas a gauche
