@@ -23,7 +23,8 @@ class ViewerGL:
         glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
         # création et paramétrage de la fenêtre
         glfw.window_hint(glfw.RESIZABLE, False)
-        self.window = glfw.create_window(self.profile.width, self.profile.height, 'Jeu', None, None)
+        [width, height] = self.profile.get_width_height()
+        self.window = glfw.create_window(width, height, 'Jeu', None, None)
         glfw.set_window_pos(self.window, 50,50)
         glfw.set_input_mode(self.window, glfw.CURSOR, glfw.CURSOR_HIDDEN) #on cache le curseur
         # paramétrage de la fonction de gestion des évènements
@@ -171,18 +172,20 @@ class ViewerGL:
         (x_cursor,y_cursor) = glfw.get_cursor_pos(self.window)
         rapport_de_rotation_largeur = 0
         rapport_de_rotation_hauteur = 0
+
+        [width, height] = self.profile.get_width_height()
         
-        if 0<x_cursor<self.profile.width and 0<y_cursor<self.profile.height:
+        if 0<x_cursor<width and 0<y_cursor<height:
             tour = np.pi*2
 
-            rapport_de_rotation_largeur = tour*x_cursor/self.profile.width
-            rapport_de_rotation_hauteur = tour*y_cursor/self.profile.height
+            rapport_de_rotation_largeur = tour*x_cursor/width
+            rapport_de_rotation_hauteur = tour*y_cursor/height
 
             #On centre le rapport:
             rapport_de_rotation_largeur = rapport_de_rotation_largeur-tour/2
             rapport_de_rotation_hauteur = rapport_de_rotation_hauteur-tour/2
         
-        glfw.set_cursor_pos(self.window, self.profile.width/2, self.profile.height/2)
+        glfw.set_cursor_pos(self.window, width/2, height/2)
         return rapport_de_rotation_largeur, -rapport_de_rotation_hauteur
 
 

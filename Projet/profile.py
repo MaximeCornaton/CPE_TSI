@@ -28,6 +28,9 @@ class Profile:
         self.game_jump = glfw.KEY_SPACE
         self.game_shoot = glfw.MOUSE_BUTTON_1
 
+    def get_width_height(self):
+        return [self.width, self.height]
+
     def get_camera_view_position(self):
     #Retourne la position de la camera par rapport a l'objet en mode jeu
         return self.camera_view_position
