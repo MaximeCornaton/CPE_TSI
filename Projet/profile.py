@@ -7,11 +7,12 @@ class Profile:
         #mon = glfw.get_primary_monitor()
         #print(glfw.get_monitor_workarea(mon)) #Probleme
         
-        self.width = 1200
-        self.height = 800
+        self.width = 1600
+        self.height = 1000
 
         self.game_mode = 0 #On commence en mode de jeu/ 1 = Mode libre (on peut se deplacer sans suivre l'objet etc)/ 2=Pause?
-        self.camera_view_position = [-0.4,0.5,1.5] #Position de la camera par rapport a l'objet en mode jeu
+        self.camera_view_position_init = [-0.4,0.5,1.5]
+        self.camera_view_position = self.camera_view_position_init[:] #Position de la camera par rapport a l'objet en mode jeu
 
         self.true_distance_step = 0.15 #Distance de deplacement en mode jeu
         self.false_distance_step = 0.5 #Distance de deplacement en mode libre
@@ -54,3 +55,21 @@ class Profile:
 
     def get_game_crosshair_width(self):
         return self.game_crosshair_width if self.game_mode == 0 else 0
+
+    def set_game_mode(self, val='other'):
+        if val == 'other':
+            if self.get_game_mode() == 0:
+                self.game_mode = 1
+            elif self.get_game_mode() == 1:
+                self.game_mode = 0
+                self.set_camera_view_position() #On reinitialise la camera
+        else:
+            self.game_mode = int(val)
+        print('Le jeu est à présent en mode',self.get_game_mode())
+
+    def set_camera_view_position(self, val=[0,0,0]):
+        if val == [0,0,0]:
+            self.camera_view_position = self.camera_view_position_init
+        else:
+            for i in range(len(val)):
+                self.camera_view_position[i] += val[i]

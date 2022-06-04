@@ -24,6 +24,7 @@ class ViewerGL:
         # création et paramétrage de la fenêtre
         glfw.window_hint(glfw.RESIZABLE, False)
         self.window = glfw.create_window(self.profile.width, self.profile.height, 'Jeu', None, None)
+        glfw.set_window_pos(self.window, 50,50)
         glfw.set_input_mode(self.window, glfw.CURSOR, glfw.CURSOR_HIDDEN) #on cache le curseur
         # paramétrage de la fonction de gestion des évènements
         glfw.set_key_callback(self.window, self.key_callback)
@@ -38,6 +39,7 @@ class ViewerGL:
         print(f"OpenGL: {GL.glGetString(GL.GL_VERSION).decode('ascii')}")
 
         self.objs = []
+        self.objects = []
         self.touch = {}
 
     def run(self):
@@ -47,8 +49,8 @@ class ViewerGL:
             GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
             self.update_key() #On recupere les touches
-            if self.profile.get_game_mode() == 0: #Si le jeu est en mode "jeu" 
-                self.camera_view(self.profile.get_camera_view_position()) #On uptade la camera en fonction de l'objet
+            self.camera_view() #On uptade la camera en fonction de l'objet
+
 
             for obj in self.objs:
                 GL.glUseProgram(obj.program)
@@ -67,12 +69,16 @@ class ViewerGL:
         if key == glfw.KEY_ESCAPE and action == glfw.PRESS:
             glfw.set_window_should_close(win, glfw.TRUE)
         self.touch[key] = action
+        #Mode libre
+        if glfw.KEY_C in self.touch and self.touch[glfw.KEY_C] > 0 and glfw.KEY_V in self.touch and self.touch[glfw.KEY_V] > 0:
+            self.profile.set_game_mode()
 
     def mouse_callback(self,win, button, action, mods):
         self.touch[button] = action
     
-    def add_object(self, obj):
+    def add_object(self, obj, objects):
         self.objs.append(obj)
+        self.objects.append(objects)
 
     def set_camera(self, cam):
         self.cam = cam
@@ -108,39 +114,51 @@ class ViewerGL:
             print("Pas de variable uniforme : projection")
         GL.glUniformMatrix4fv(loc, 1, GL.GL_FALSE, self.cam.projection)
 
-    def camera_view(self, camera_view_position):
+    def camera_view(self):
         #x,y,z parametre de positionnement de la camera par rapport a l'objet
-        [x_distance, y_distance, z_distance] = camera_view_position
+        [x_distance, y_distance, z_distance] = self.profile.get_camera_view_position()
         self.cam.transformation.rotation_euler = self.objs[0].transformation.rotation_euler.copy() 
         self.cam.transformation.rotation_euler[pyrr.euler.index().yaw] += np.pi #On met la camera derriere l'objet
         self.cam.transformation.rotation_center = self.objs[0].transformation.translation + self.objs[0].transformation.rotation_center #On met a jour le centre de rotation
         self.cam.transformation.translation = self.objs[0].transformation.translation + pyrr.Vector3([x_distance, y_distance, z_distance]) #On met a jour le placement
 
     def update_key(self):
-        #Rotation
-        [angle_de_rotation_y,angle_de_rotation_x] = self.mouse_rotation_step()
-        self.objs[0].transformation.rotation_euler[pyrr.euler.index().yaw] += angle_de_rotation_y*self.profile.get_game_angle_sensibility()
-        #self.objs[0].transformation.rotation_euler[pyrr.euler.index().roll] += angle_de_rotation_x*self.profile.get_game_angle_sensibility()
-
-        #Deplacement 
         keys_walk = self.profile.get_game_keys_walk() #For,Back,Left,Right
-        if keys_walk[0] in self.touch and self.touch[keys_walk[0]] > 0:
-            self.objs[0].transformation.translation += \
-                pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_eulers(self.objs[0].transformation.rotation_euler), pyrr.Vector3([0, 0, self.profile.get_game_distance_step()]))
-        if keys_walk[1] in self.touch and self.touch[keys_walk[1]] > 0:
-            self.objs[0].transformation.translation -= \
-                pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_eulers(self.objs[0].transformation.rotation_euler), pyrr.Vector3([0, 0, self.profile.get_game_distance_step()]))
-        if keys_walk[2] in self.touch and self.touch[keys_walk[2]] > 0:
-            self.objs[0].transformation.translation += \
-                pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_eulers(self.objs[0].transformation.rotation_euler), pyrr.Vector3([self.profile.get_game_distance_step(), 0, 0]))
-        if keys_walk[3] in self.touch and self.touch[keys_walk[3]] > 0:
-            self.objs[0].transformation.translation -= \
-                pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_eulers(self.objs[0].transformation.rotation_euler), pyrr.Vector3([self.profile.get_game_distance_step(), 0, 0]))
-       
-        #Tir
-        if self.profile.get_game_shoot() in self.touch and self.touch[self.profile.get_game_shoot()] > 0:
-            self.bullet = Bullet(mesh='assets/bullet2.obj', texture='assets/ak47tr.png', position = [0,2,0], rot_center = 0.2, scale=[0.1,0.1,0.1,1])
-            self.bullet.create_add_object(program_id = self.program_id, viewer = self)
+
+        if self.profile.get_game_mode() == 0:
+            #Rotation
+            [angle_de_rotation_y,angle_de_rotation_x] = self.mouse_rotation_step()
+            self.objs[0].transformation.rotation_euler[pyrr.euler.index().yaw] += angle_de_rotation_y*self.profile.get_game_angle_sensibility()
+            #self.objs[0].transformation.rotation_euler[pyrr.euler.index().roll] += angle_de_rotation_x*self.profile.get_game_angle_sensibility()
+
+            #Deplacement 
+            if keys_walk[0] in self.touch and self.touch[keys_walk[0]] > 0:
+                self.objs[0].transformation.translation += \
+                    pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_eulers(self.objs[0].transformation.rotation_euler), pyrr.Vector3([0, 0, self.profile.get_game_distance_step()]))
+            if keys_walk[1] in self.touch and self.touch[keys_walk[1]] > 0:
+                self.objs[0].transformation.translation -= \
+                    pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_eulers(self.objs[0].transformation.rotation_euler), pyrr.Vector3([0, 0, self.profile.get_game_distance_step()]))
+            if keys_walk[2] in self.touch and self.touch[keys_walk[2]] > 0:
+                self.objs[0].transformation.translation += \
+                    pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_eulers(self.objs[0].transformation.rotation_euler), pyrr.Vector3([self.profile.get_game_distance_step(), 0, 0]))
+            if keys_walk[3] in self.touch and self.touch[keys_walk[3]] > 0:
+                self.objs[0].transformation.translation -= \
+                    pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_eulers(self.objs[0].transformation.rotation_euler), pyrr.Vector3([self.profile.get_game_distance_step(), 0, 0]))
+        
+            #Tir
+            if self.profile.get_game_shoot() in self.touch and self.touch[self.profile.get_game_shoot()] > 0:
+                self.objects[0].shoot(self.objs)
+
+        elif self.profile.get_game_mode() == 1:
+            if keys_walk[0] in self.touch and self.touch[keys_walk[0]] > 0:
+               self.profile.set_camera_view_position(val=[0,0,-1])
+            if keys_walk[1] in self.touch and self.touch[keys_walk[1]] > 0:
+                self.profile.set_camera_view_position(val=[0,0,1])
+            if keys_walk[2] in self.touch and self.touch[keys_walk[2]] > 0:
+                self.profile.set_camera_view_position(val=[-1,0,0])
+            if keys_walk[3] in self.touch and self.touch[keys_walk[3]] > 0:
+                self.profile.set_camera_view_position(val=[1,0,0])
+            #self.cam.transformation.rotation_center = self.profile.get_camera_view_position() #On met a jour le centre de rotation
 
     def mouse_rotation_step(self):
         #x,y = 0,0 en bas a gauche
