@@ -4,10 +4,9 @@ import glutils
 from mesh import Mesh
 from cpe3d import Object3D, Camera, Transformation3D, Text
 import numpy as np
-import OpenGL.GL as GL
-import pyrr
 
-class main():
+
+def main():
     viewer = ViewerGL()
 
     viewer.set_camera(Camera())
@@ -17,11 +16,10 @@ class main():
     program3d_id = glutils.create_program_from_file('shader.vert', 'shader.frag')
     programGUI_id = glutils.create_program_from_file('gui.vert', 'gui.frag')
 
+    viewer.set_program_id(program3d_id)
+
     ak47 = Load_Object(mesh='assets/ak47.obj', texture='assets/ak47tr.png', position = [0,2,0], rot_center = 0.2, scale=[1,1,1,1])
     ak47.create_add_object(program_id = program3d_id, viewer = viewer)
-
-    bullet = Load_Object(mesh='assets/bullet.obj', texture='assets/ak47tr.png', position = [0,2,0], rot_center = 0.2, scale=[0.1,0.1,0.1,1])
-    bullet.create_add_object(program_id = program3d_id, viewer = viewer)
 
 
     m = Mesh()
@@ -41,6 +39,7 @@ class main():
     viewer.add_object(o)
 
     viewer.run()
+
 
 
 if __name__ == '__main__':

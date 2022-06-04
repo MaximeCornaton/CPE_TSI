@@ -7,6 +7,8 @@ import numpy as np
 from cpe3d import Object3D
 from profile import Profile
 
+from load_object import Bullet
+
 class ViewerGL:
     def __init__(self):
         #Initialisation du profil joueur
@@ -137,8 +139,8 @@ class ViewerGL:
        
         #Tir
         if self.profile.get_game_shoot() in self.touch and self.touch[self.profile.get_game_shoot()] > 0:
-            print("tir")
-
+            self.bullet = Bullet(mesh='assets/bullet2.obj', texture='assets/ak47tr.png', position = [0,2,0], rot_center = 0.2, scale=[0.1,0.1,0.1,1])
+            self.bullet.create_add_object(program_id = self.program_id, viewer = self)
 
     def mouse_rotation_step(self):
         #x,y = 0,0 en bas a gauche
@@ -160,4 +162,5 @@ class ViewerGL:
         return rapport_de_rotation_largeur, rapport_de_rotation_hauteur
 
 
-
+    def set_program_id(self, program3d_id):
+        self.program_id = program3d_id

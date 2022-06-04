@@ -37,3 +37,9 @@ class Load_Object:
     def create_add_object(self, program_id, viewer):
         o = Object3D(self.mesh.load_to_gpu(), self.mesh.get_nb_triangles(), program_id, self.texture, self.transformation)
         viewer.add_object(o)
+
+
+class Bullet(Load_Object):
+    def __init__(self, mesh, texture, position, rot_center, scale):
+        super().__init__(mesh, texture, position, rot_center, scale)
+
