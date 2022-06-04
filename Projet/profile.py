@@ -25,7 +25,7 @@ class Profile:
         self.game_backward_walk = glfw.KEY_D
         self.game_leftward_walk = glfw.KEY_S
         self.game_rightward_walk = glfw.KEY_F
-
+        self.game_jump = glfw.KEY_SPACE
         self.game_shoot = glfw.MOUSE_BUTTON_1
 
     def get_camera_view_position(self):

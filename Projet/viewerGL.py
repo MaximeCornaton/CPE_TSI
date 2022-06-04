@@ -42,6 +42,8 @@ class ViewerGL:
         self.objects = []
         self.touch = {}
 
+        self.animation = False
+
     def run(self):
         # boucle d'affichage
         while not glfw.window_should_close(self.window):
@@ -49,13 +51,16 @@ class ViewerGL:
             GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
             self.update_key() #On recupere les touches
-            self.camera_view() #On uptade la camera en fonction de l'objet
+            if self.animation == False: #Si on est pas en pleine animation
+                self.camera_view() #On uptade la camera en fonction de l'objet
 
 
-            for obj in self.objs:
+            for i,obj in enumerate(self.objs):
                 GL.glUseProgram(obj.program)
                 if isinstance(obj, Object3D):
                     self.update_camera(obj.program)
+                if self.objects[i] != None:
+                    self.objects[i].gravity()
                 obj.draw()
             
 
@@ -119,6 +124,7 @@ class ViewerGL:
         [x_distance, y_distance, z_distance] = self.profile.get_camera_view_position()
         self.cam.transformation.rotation_euler = self.objs[0].transformation.rotation_euler.copy() 
         self.cam.transformation.rotation_euler[pyrr.euler.index().yaw] += np.pi #On met la camera derriere l'objet
+        #self.cam.transformation.rotation_euler[pyrr.euler.index().roll] = -self.cam.transformation.rotation_euler[pyrr.euler.index().roll]
         self.cam.transformation.rotation_center = self.objs[0].transformation.translation + self.objs[0].transformation.rotation_center #On met a jour le centre de rotation
         self.cam.transformation.translation = self.objs[0].transformation.translation + pyrr.Vector3([x_distance, y_distance, z_distance]) #On met a jour le placement
 
@@ -129,7 +135,7 @@ class ViewerGL:
             #Rotation
             [angle_de_rotation_y,angle_de_rotation_x] = self.mouse_rotation_step()
             self.objs[0].transformation.rotation_euler[pyrr.euler.index().yaw] += angle_de_rotation_y*self.profile.get_game_angle_sensibility()
-            #self.objs[0].transformation.rotation_euler[pyrr.euler.index().roll] += angle_de_rotation_x*self.profile.get_game_angle_sensibility()
+            #self.objs[0].transformation.rotation_euler[pyrr.euler.index().roll] += angle_de_rotation_x*self.profile.get_game_angle_sensibility()/2
 
             #Deplacement 
             if keys_walk[0] in self.touch and self.touch[keys_walk[0]] > 0:
@@ -144,7 +150,8 @@ class ViewerGL:
             if keys_walk[3] in self.touch and self.touch[keys_walk[3]] > 0:
                 self.objs[0].transformation.translation -= \
                     pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_eulers(self.objs[0].transformation.rotation_euler), pyrr.Vector3([self.profile.get_game_distance_step(), 0, 0]))
-        
+            
+
             #Tir
             if self.profile.get_game_shoot() in self.touch and self.touch[self.profile.get_game_shoot()] > 0:
                 self.objects[0].shoot(self.objs)
@@ -158,7 +165,6 @@ class ViewerGL:
                 self.profile.set_camera_view_position(val=[-1,0,0])
             if keys_walk[3] in self.touch and self.touch[keys_walk[3]] > 0:
                 self.profile.set_camera_view_position(val=[1,0,0])
-            #self.cam.transformation.rotation_center = self.profile.get_camera_view_position() #On met a jour le centre de rotation
 
     def mouse_rotation_step(self):
         #x,y = 0,0 en bas a gauche
@@ -177,7 +183,7 @@ class ViewerGL:
             rapport_de_rotation_hauteur = rapport_de_rotation_hauteur-tour/2
         
         glfw.set_cursor_pos(self.window, self.profile.width/2, self.profile.height/2)
-        return rapport_de_rotation_largeur, rapport_de_rotation_hauteur
+        return rapport_de_rotation_largeur, -rapport_de_rotation_hauteur
 
 
     def set_program_id(self, program3d_id):

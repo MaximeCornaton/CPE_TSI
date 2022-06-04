@@ -6,7 +6,10 @@ from cpe3d import Transformation3D, Object3D
 import numpy as np
 
 class Load_Object:
-    def __init__(self, mesh='assets/ak47.obj', texture='assets/ak47tr.png', position = [0,2,0], rot_center = 0.2, scale=[1,1,1,1]):
+    def __init__(self, mesh='assets/ak47.obj', texture='assets/ak47tr.png', position = [0,2,0], rot_center = 0.2, scale=[1,1,1,1], weight = 5, ymin = 2):
+        self.weight = weight
+        self.ymin = ymin
+
         self.mesh = self.init_mesh(mesh, scale)
         self.transformation = self.init_transformation(position,rot_center)
         self.texture = glutils.load_texture(texture)
@@ -50,10 +53,19 @@ class Load_Object:
     def get_position(self):
         return self.object.transformation.translation
 
+    def gravity(self):
+        #print(self.transformation.translation[1], self.ymin)
+        if self.transformation.translation[1] > self.ymin:
+            self.transformation.translation[1] -= self.weight*(self.transformation.translation[1]-self.ymin)/10
+        if self.transformation.translation[1] < self.ymin:
+            self.transformation.translation[1] = self.ymin
+
+
 class Bullet(Load_Object):
-    def __init__(self, mesh, texture, position, rot_center, scale, bullet_speed = 0.1):
-        super().__init__(mesh, texture, position, rot_center, scale)
+    def __init__(self, mesh, texture, position, rot_center, scale, bullet_speed = 0.1, weight = 0):
+        super().__init__(mesh, texture, position, rot_center, scale, weight)
         self.bullet_speed = bullet_speed #vitesse des balles
+        self.bullet_weight = weight
         
     def auto_movement(self, objs):
         [x,y,z] = self.get_position()
@@ -72,9 +84,10 @@ class Bullet(Load_Object):
             [x,y,z] = self.get_position()
 
 class Arme(Load_Object):
-    def __init__(self, mesh, texture, position, rot_center, scale, freq_tire = 3):
-        super().__init__(mesh, texture, position, rot_center, scale)
+    def __init__(self, mesh, texture, position, rot_center, scale, freq_tire = 3, weight = 5):
+        super().__init__(mesh, texture, position, rot_center, scale, weight)
         self.freq_tire = freq_tire #frequence de tir par seconde
+        self.weight = weight
 
         self.last_shoot = 0
 
@@ -89,3 +102,6 @@ class Arme(Load_Object):
             self.bullet.append(bullet)
             self.bullet[-1].create_add_object(program_id = self.program_id, viewer = self.viewer)
             self.bullet[-1].auto_movement(objs)
+
+    def jump(self):
+        print('jump')
