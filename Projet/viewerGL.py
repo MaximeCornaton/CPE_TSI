@@ -155,7 +155,7 @@ class ViewerGL:
 
             #Tir
             if self.profile.get_game_shoot() in self.touch and self.touch[self.profile.get_game_shoot()] > 0:
-                self.objects[0].shoot(self.objs)
+                self.objects[0].shoot(self.objs, self.objects)
 
         elif self.profile.get_game_mode() == 1:
             if keys_walk[0] in self.touch and self.touch[keys_walk[0]] > 0:

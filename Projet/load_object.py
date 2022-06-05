@@ -63,7 +63,7 @@ class Load_Object:
             self.transformation.translation[1] = self.ymin
 
     def centre_gravite(self):
-        [x,y,z] = self.transformation.translation
+        [x,y,z] = self.get_position()
         return [x,y,z]
 
 class Bullet(Load_Object):
@@ -74,7 +74,7 @@ class Bullet(Load_Object):
 
         self.transformation.translation.y += 0.5
         
-    def auto_movement(self, objs):
+    def auto_movement(self, objs, objs_global):
         [x,y,z] = self.get_position()
         collision = False
 
@@ -88,8 +88,12 @@ class Bullet(Load_Object):
         while(-x_lim<x<x_lim and -z_lim<z<z_lim and collision == False):
             self.object.transformation.translation += \
                 pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_eulers(self.object.transformation.rotation_euler), vecteur_translation)
-            if False:
-                collision = True
+            for obj in objs_global:
+                if type(obj) == Cible:
+                    dist_euclidienne = np.linalg.norm(self.get_position()-obj.get_position())
+                    if dist_euclidienne < 1:
+                        print('touché')
+                        collision = True
             [x,y,z] = self.get_position()
 
 class Arme(Load_Object):
@@ -102,7 +106,7 @@ class Arme(Load_Object):
 
         self.bullet = []
 
-    def shoot(self, objs):
+    def shoot(self, objs,objects):
         time_now = time.time()
         if (time_now-self.last_shoot > 1/self.freq_tire):
             self.last_shoot = time_now
@@ -110,7 +114,7 @@ class Arme(Load_Object):
             bullet = Bullet(mesh='assets/bullet2.obj', texture='assets/ak47tr.png', position = position_bullet, rot_center = 0.0, scale=[0.1,0.1,0.1,1])
             self.bullet.append(bullet)
             self.bullet[-1].create_add_object(program_id = self.program_id, viewer = self.viewer)
-            self.bullet[-1].auto_movement(objs)
+            self.bullet[-1].auto_movement(objs,objects)
 
     def jump(self):
         print('jump')
