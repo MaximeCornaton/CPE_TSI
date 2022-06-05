@@ -1,4 +1,4 @@
-from load_object import Arme
+from load_object import Arme, Cible
 from viewerGL import ViewerGL
 import glutils
 from mesh import Mesh
@@ -32,6 +32,9 @@ def main():
     texture = glutils.load_texture('assets/sand.jpg')
     o = Object3D(m.load_to_gpu(), m.get_nb_triangles(), program3d_id, texture, Transformation3D())
     viewer.add_object(o, None)
+
+    cible = Cible(mesh='assets/target.obj', texture='assets/textB1!.png', position = [0,0,10], rot_center = 0.2, scale=[1,1,1,1], rotation=[0,0,np.pi])
+    cible.create_add_object(program_id = program3d_id, viewer = viewer)
 
     vao = Text.initalize_geometry()
     texture = glutils.load_texture('assets/fontB.jpg')
