@@ -26,7 +26,6 @@ class Load_Object:
     
     def init_transformation(self, position, rot_center):
         tr = Transformation3D() #Position initiale de l'objet
-        tr.translation.y = -np.amin(self.mesh.vertices, axis=0)[1] 
         tr.translation.x += position[0]
         tr.translation.y += position[1]
         tr.translation.z += position[2]
@@ -66,6 +65,8 @@ class Bullet(Load_Object):
         super().__init__(mesh, texture, position, rot_center, scale, weight)
         self.bullet_speed = bullet_speed #vitesse des balles
         self.bullet_weight = weight
+
+        self.transformation.translation.y += 0.5
         
     def auto_movement(self, objs):
         [x,y,z] = self.get_position()
