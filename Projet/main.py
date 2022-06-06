@@ -40,7 +40,17 @@ def main():
     texture = glutils.load_texture('assets/fontB.jpg')
     crosshair_width_12 = viewer.profile.get_game_crosshair_width()/2
     o = Text('+', np.array([-crosshair_width_12,-crosshair_width_12], np.float32), np.array([crosshair_width_12, crosshair_width_12], np.float32), vao, 2, programGUI_id, texture)
-    viewer.add_object(o, None)
+    viewer.add_object(o, 'Floor')
+
+    vao = Text.initalize_geometry()
+    texture = glutils.load_texture('assets/fontB.jpg')
+    o = Text('Timer :', np.array([-1,-1], np.float32), np.array([-1+0.3,-1+0.1], np.float32), vao, 2, programGUI_id, texture)
+    viewer.add_object(o, 'Timer')
+
+    vao = Text.initalize_geometry()
+    texture = glutils.load_texture('assets/fontB.jpg')
+    o = Text('Score :', np.array([1-0.3,-1], np.float32), np.array([1,-1+0.1], np.float32), vao, 2, programGUI_id, texture)
+    viewer.add_object(o, 'Score')
 
     viewer.run()
 

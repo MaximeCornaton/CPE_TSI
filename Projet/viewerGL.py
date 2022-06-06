@@ -6,6 +6,7 @@ import pyrr
 import numpy as np
 from cpe3d import Object3D
 from profile import Profile
+import time
 
 from load_object import Bullet
 
@@ -44,6 +45,9 @@ class ViewerGL:
         self.touch = {}
 
         self.animation = False
+        self.timer = time.time()
+        self.score = 0
+
 
     def run(self):
         # boucle d'affichage
@@ -55,13 +59,18 @@ class ViewerGL:
             if self.animation == False: #Si on est pas en pleine animation
                 self.camera_view() #On uptade la camera en fonction de l'objet
 
+            
 
             for i,obj in enumerate(self.objs):
                 GL.glUseProgram(obj.program)
                 if isinstance(obj, Object3D):
                     self.update_camera(obj.program)
-                if self.objects[i] != None:
+                if self.objects[i] != None and isinstance(self.objects[i], str) == False:
                     self.objects[i].gravity()
+                if self.objects[i] == 'Timer':
+                    obj.value = 'Timer : '+str(self.get_timer())
+                if self.objects[i] == 'Score':
+                    obj.value = 'Score : '+str(self.score)
                 obj.draw()
             
 
@@ -191,3 +200,11 @@ class ViewerGL:
 
     def set_program_id(self, program3d_id):
         self.program_id = program3d_id
+
+    def get_timer(self):
+        time_ = time.time()
+        if int(time_-self.timer) < self.profile.get_game_timer_sec():
+            return int(time_-self.timer)
+
+    def add_score(self, i):
+        self.score += i

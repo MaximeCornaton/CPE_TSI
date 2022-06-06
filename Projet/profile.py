@@ -8,18 +8,20 @@ class Profile:
         #print(glfw.get_monitor_workarea(mon)) #Probleme
         
         self.width = 1600
-        self.height = 1000
+        self.height = 800
 
         self.game_mode = 0 #On commence en mode de jeu/ 1 = Mode libre (on peut se deplacer sans suivre l'objet etc)/ 2=Pause?
         self.camera_view_position_init = [-0.4,0.5,1.5]
         self.camera_view_position = self.camera_view_position_init[:] #Position de la camera par rapport a l'objet en mode jeu
 
-        self.true_distance_step = 0.15 #Distance de deplacement en mode jeu
+        self.true_distance_step = 0.1 #Distance de deplacement en mode jeu
         self.false_distance_step = 0.5 #Distance de deplacement en mode libre
 
-        self.game_angle_sensibility = 0.5 #Sensibilité de rotation
+        self.game_angle_sensibility = 0.25 #Sensibilité de rotation
 
         self.game_crosshair_width = 0.05 #Taille du crosshair
+
+        self.game_timer_sec = 60 #en seconde
 
         self.game_forward_walk = glfw.KEY_E
         self.game_backward_walk = glfw.KEY_D
@@ -76,3 +78,6 @@ class Profile:
         else:
             for i in range(len(val)):
                 self.camera_view_position[i] += val[i]
+
+    def get_game_timer_sec(self):
+        return self.game_timer_sec

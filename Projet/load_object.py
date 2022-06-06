@@ -92,7 +92,7 @@ class Bullet(Load_Object):
                 if type(obj) == Cible:
                     dist_euclidienne = np.linalg.norm(self.get_position()-obj.get_position())
                     if dist_euclidienne < 1:
-                        print('touché')
+                        self.viewer.add_score(1)
                         collision = True
             [x,y,z] = self.get_position()
 
