@@ -6,7 +6,7 @@ from cpe3d import Transformation3D, Object3D
 import numpy as np
 
 class Load_Object:
-    def __init__(self, mesh='assets/ak47.obj', texture='assets/ak47tr.png', position = [0,2,0], rot_center = 0.2, scale=[1,1,1,1], weight = 5, ymin = 2,rotation = [0,0,0],):
+    def __init__(self, mesh='assets/icosphere.obj', texture='assets/Solid_white_hd.png', position = [0,2,0], rot_center = 0.2, scale=[1,1,1,1], weight = 5, ymin = 2,rotation = [0,0,0],):
         self.weight = weight
         self.ymin = ymin
 
@@ -66,6 +66,19 @@ class Load_Object:
         [x,y,z] = self.get_position()
         return [x,y,z]
 
+    def remove_(self, objs, objs_global):
+        objs.remove(self.object)
+        objs_global.remove(self)
+
+    def new_cible_random(self, size_map, program3d_id, viewer):
+        [x1_min, z1_min, x2_max, z2_max] = size_map#taille du sol
+
+        x = np.random.randint(x1_min,x2_max)
+        z = np.random.randint(z1_min,z2_max)
+
+        cible = Cible(mesh='assets/target.obj', texture='assets/textB1!.png', position = [x,0,z], rot_center = 0.2, scale=[1,1,1,1], rotation=[0,0,np.pi])
+        cible.create_add_object(program_id = program3d_id, viewer = viewer)
+
 class Bullet(Load_Object):
     def __init__(self, mesh, texture, position, rot_center, scale, bullet_speed = 0.1, weight = 0, ymin = 2, rotation=[0,0,0]):
         super().__init__(mesh, texture, position, rot_center, scale, weight, ymin, rotation)
@@ -74,26 +87,28 @@ class Bullet(Load_Object):
 
         self.transformation.translation.y += 0.5
         
-    def auto_movement(self, objs, objs_global):
+    def auto_movement(self, objs, objs_global, size_map):
         [x,y,z] = self.get_position()
         collision = False
 
         #objs[1].transformation.translation
-        [x_lim,z_lim] = 25,25 #taille du sol
+        [x1_min, z1_min, x2_max, z2_max] = size_map #taille du sol
         rotation = objs[0].transformation.rotation_euler
 
         vecteur_translation = pyrr.Vector3([0, 0, self.bullet_speed])
         self.object.transformation.rotation_euler[pyrr.euler.index().yaw] += rotation[2]
         
-        while(-x_lim<x<x_lim and -z_lim<z<z_lim and collision == False):
+        while(x1_min<x<x2_max and z1_min<z<z2_max and collision == False):
             self.object.transformation.translation += \
                 pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_eulers(self.object.transformation.rotation_euler), vecteur_translation)
             for obj in objs_global:
                 if type(obj) == Cible:
                     dist_euclidienne = np.linalg.norm(self.get_position()-obj.get_position())
                     if dist_euclidienne < 1:
-                        self.viewer.add_score(1)
-                        collision = True
+                        obj.hit(objs, objs_global) #On renvoie vers la fonction de touchage de cible
+                        self.remove_(objs, objs_global) #Supprime la balle
+                        collision = True #on arrete le deplacement
+                        self.new_cible_random(size_map, self.program_id, self.viewer)
             [x,y,z] = self.get_position()
 
 class Arme(Load_Object):
@@ -106,19 +121,24 @@ class Arme(Load_Object):
 
         self.bullet = []
 
-    def shoot(self, objs,objects):
+    def shoot(self, objs,objects, size_map):
         time_now = time.time()
         if (time_now-self.last_shoot > 1/self.freq_tire):
             self.last_shoot = time_now
             position_bullet = self.object.transformation.translation #Position de l'arme
-            bullet = Bullet(mesh='assets/bullet2.obj', texture='assets/ak47tr.png', position = position_bullet, rot_center = 0.0, scale=[0.1,0.1,0.1,1])
+            bullet = Bullet(mesh='assets/icosphere.obj', texture='assets/Solid_white_hd.png', position = position_bullet, rot_center = 0.0, scale=[0.02,0.02,0.02,1])
             self.bullet.append(bullet)
             self.bullet[-1].create_add_object(program_id = self.program_id, viewer = self.viewer)
-            self.bullet[-1].auto_movement(objs,objects)
+            self.bullet[-1].auto_movement(objs,objects, size_map)
 
     def jump(self):
         print('jump')
 
 class Cible(Load_Object):
-     def __init__(self, mesh, texture, position, rot_center, scale, weight = 10, ymin = 2, rotation=[0,0,0]):
+    def __init__(self, mesh, texture, position, rot_center, scale, weight = 10, ymin = 2, rotation=[0,0,0]):
         super().__init__(mesh, texture, position, rot_center, scale, weight,ymin, rotation)
+
+    def hit(self, objs, objs_global):
+        self.remove_(objs, objs_global)
+        self.viewer.add_score(1)
+    

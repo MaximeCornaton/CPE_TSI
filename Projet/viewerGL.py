@@ -8,7 +8,7 @@ from cpe3d import Object3D
 from profile import Profile
 import time
 
-from load_object import Bullet
+from load_object import Bullet, Cible
 
 class ViewerGL:
     def __init__(self):
@@ -60,19 +60,30 @@ class ViewerGL:
                 self.camera_view() #On uptade la camera en fonction de l'objet
 
             
-
-            for i,obj in enumerate(self.objs):
-                GL.glUseProgram(obj.program)
-                if isinstance(obj, Object3D):
-                    self.update_camera(obj.program)
-                if self.objects[i] != None and isinstance(self.objects[i], str) == False:
-                    self.objects[i].gravity()
-                if self.objects[i] == 'Timer':
-                    obj.value = 'Timer : '+str(self.get_timer())
-                if self.objects[i] == 'Score':
-                    obj.value = 'Score : '+str(self.score)
-                obj.draw()
-            
+            if self.profile.get_game() == True:
+                i = self.objects.index('Resultat')
+                self.objs[i].value = ' '
+                self.objs[i].draw()
+                i = self.objects.index('Rejouer')
+                self.objs[i].value = ' '
+                for i,obj in enumerate(self.objs):
+                    GL.glUseProgram(obj.program)
+                    if isinstance(obj, Object3D):
+                        self.update_camera(obj.program)
+                    if self.objects[i] != None and isinstance(self.objects[i], str) == False:
+                        self.objects[i].gravity()
+                    if self.objects[i] == 'Timer':
+                        obj.value = 'Timer : '+str(self.get_timer())
+                    if self.objects[i] == 'Score':
+                        obj.value = 'Score : '+str(self.score)
+                    obj.draw()
+            else: 
+                i = self.objects.index('Resultat')
+                self.objs[i].value = 'Score : '+str(self.score)
+                self.objs[i].draw()
+                i = self.objects.index('Rejouer')
+                self.objs[i].value = 'Entree pour Rejouer'
+                self.objs[i].draw()
 
             # changement de buffer d'affichage pour éviter un effet de scintillement
             glfw.swap_buffers(self.window)
@@ -87,6 +98,9 @@ class ViewerGL:
         #Mode libre
         if glfw.KEY_C in self.touch and self.touch[glfw.KEY_C] > 0 and glfw.KEY_V in self.touch and self.touch[glfw.KEY_V] > 0:
             self.profile.set_game_mode()
+        #Rejouer
+        if glfw.KEY_ENTER in self.touch and self.touch[glfw.KEY_ENTER] > 0 and self.profile.get_game() == False:
+            self.start_game(self.program_id)
 
     def mouse_callback(self,win, button, action, mods):
         self.touch[button] = action
@@ -164,7 +178,7 @@ class ViewerGL:
 
             #Tir
             if self.profile.get_game_shoot() in self.touch and self.touch[self.profile.get_game_shoot()] > 0:
-                self.objects[0].shoot(self.objs, self.objects)
+                self.objects[0].shoot(self.objs, self.objects, size_map= self.profile.get_game_size_map())
 
         elif self.profile.get_game_mode() == 1:
             if keys_walk[0] in self.touch and self.touch[keys_walk[0]] > 0:
@@ -205,6 +219,26 @@ class ViewerGL:
         time_ = time.time()
         if int(time_-self.timer) < self.profile.get_game_timer_sec():
             return int(time_-self.timer)
+        else: 
+            self.profile.set_game(False)
 
     def add_score(self, i):
         self.score += i
+
+    def set_score(self, i=0):
+        self.score = i
+
+    def get_game_map_size(self):
+        return self.profile.get_game_size_map()
+
+    def set_timer(self, val = ''):
+        self.timer = val if val != '' else time.time()
+
+
+    def start_game(self, program3d_id):
+        self.set_program_id(program3d_id)
+        self.set_timer()
+        self.profile.set_game(True)
+        self.set_score()
+        cible = Cible(mesh='assets/target.obj', texture='assets/textB1!.png', position = [0,0,10], rot_center = 0.2, scale=[1,1,1,1], rotation=[0,0,np.pi])
+        cible.create_add_object(program_id = program3d_id, viewer = self)

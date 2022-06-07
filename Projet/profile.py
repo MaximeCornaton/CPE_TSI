@@ -21,7 +21,7 @@ class Profile:
 
         self.game_crosshair_width = 0.05 #Taille du crosshair
 
-        self.game_timer_sec = 60 #en seconde
+        self.game_timer_sec = 5 #en seconde
 
         self.game_forward_walk = glfw.KEY_E
         self.game_backward_walk = glfw.KEY_D
@@ -29,6 +29,10 @@ class Profile:
         self.game_rightward_walk = glfw.KEY_F
         self.game_jump = glfw.KEY_SPACE
         self.game_shoot = glfw.MOUSE_BUTTON_1
+
+        self.game_map_size = [-50,-50,50,50]
+
+        self.game = True
 
     def get_width_height(self):
         return [self.width, self.height]
@@ -81,3 +85,12 @@ class Profile:
 
     def get_game_timer_sec(self):
         return self.game_timer_sec
+
+    def get_game_size_map(self):
+        return self.game_map_size
+
+    def set_game(self, val):
+        self.game = val
+
+    def get_game(self):
+        return self.game
