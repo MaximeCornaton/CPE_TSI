@@ -44,7 +44,6 @@ class ViewerGL:
         self.objects = []
         self.touch = {}
 
-        self.animation = False
         self.timer = time.time()
         self.score = 0
 
@@ -56,8 +55,7 @@ class ViewerGL:
             GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
             self.update_key() #On recupere les touches
-            if self.animation == False: #Si on est pas en pleine animation
-                self.camera_view() #On uptade la camera en fonction de l'objet
+            self.camera_view() #On uptade la camera en fonction de l'objet
 
             
             if self.profile.get_game() == True:
@@ -148,7 +146,8 @@ class ViewerGL:
         [x_distance, y_distance, z_distance] = self.profile.get_camera_view_position()
         self.cam.transformation.rotation_euler = self.objs[0].transformation.rotation_euler.copy() 
         self.cam.transformation.rotation_euler[pyrr.euler.index().yaw] += np.pi #On met la camera derriere l'objet
-        #self.cam.transformation.rotation_euler[pyrr.euler.index().roll] = -self.cam.transformation.rotation_euler[pyrr.euler.index().roll]
+        self.cam.transformation.rotation_euler[pyrr.euler.index().roll] = -self.cam.transformation.rotation_euler[pyrr.euler.index().roll]
+        self.cam.transformation.rotation_euler[pyrr.euler.index().pitch] = 0
         self.cam.transformation.rotation_center = self.objs[0].transformation.translation + self.objs[0].transformation.rotation_center #On met a jour le centre de rotation
         self.cam.transformation.translation = self.objs[0].transformation.translation + pyrr.Vector3([x_distance, y_distance, z_distance]) #On met a jour le placement
 

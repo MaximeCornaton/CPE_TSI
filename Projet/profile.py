@@ -21,7 +21,7 @@ class Profile:
 
         self.game_crosshair_width = 0.05 #Taille du crosshair
 
-        self.game_timer_sec = 5 #en seconde
+        self.game_timer_sec = 60 #en seconde
 
         self.game_forward_walk = glfw.KEY_E
         self.game_backward_walk = glfw.KEY_D

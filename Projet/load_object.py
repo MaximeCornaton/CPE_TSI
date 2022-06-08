@@ -88,6 +88,8 @@ class Bullet(Load_Object):
         self.transformation.translation.y += 0.5
         
     def auto_movement(self, objs, objs_global, size_map):
+        #self.transformation.translation.x += 0.4
+        #self.transformation.translation.z -= 1.5
         [x,y,z] = self.get_position()
         collision = False
 
@@ -97,8 +99,9 @@ class Bullet(Load_Object):
 
         vecteur_translation = pyrr.Vector3([0, 0, self.bullet_speed])
         self.object.transformation.rotation_euler[pyrr.euler.index().yaw] += rotation[2]
+        self.object.transformation.rotation_euler[pyrr.euler.index().roll] += rotation[0]
         
-        while(x1_min<x<x2_max and z1_min<z<z2_max and collision == False):
+        while(-5<x<5 and -5<z<5 and collision == False):
             self.object.transformation.translation += \
                 pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_eulers(self.object.transformation.rotation_euler), vecteur_translation)
             for obj in objs_global:
