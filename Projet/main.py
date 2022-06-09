@@ -17,7 +17,7 @@ def main():
     program3d_id = glutils.create_program_from_file('shader.vert', 'shader.frag')
     programGUI_id = glutils.create_program_from_file('gui.vert', 'gui.frag')
 
-    ak47 = Arme(mesh='assets/ak47.obj', texture='assets/Solid_white_hd.png', position = [0,2,0], rot_center = 0.2, scale=[1,1,1,1])
+    ak47 = Arme(mesh='assets/AK47.obj', texture='assets/Solid_white_hd.png', position = [0,2,0], rot_center = 0.2, scale=[1,1,1,1])
     ak47.create_add_object(program_id = program3d_id, viewer = viewer)
 
     viewer.start_game(program3d_id)

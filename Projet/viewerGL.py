@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from re import S
 import OpenGL.GL as GL
 import glfw
 import pyrr
@@ -46,6 +47,9 @@ class ViewerGL:
 
         self.timer = time.time()
         self.score = 0
+
+        self.vao_cible = None
+        self.vao_bullet = None
 
 
     def run(self):
@@ -154,11 +158,13 @@ class ViewerGL:
     def update_key(self):
         keys_walk = self.profile.get_game_keys_walk() #For,Back,Left,Right
 
+        #Rotation
+        [angle_de_rotation_y,angle_de_rotation_x] = self.mouse_rotation_step()
+        #self.objs[0].transformation.rotation_euler += [angle_de_rotation_x*self.profile.get_game_angle_sensibility()/2,0,angle_de_rotation_y*self.profile.get_game_angle_sensibility()]
+        self.objs[0].transformation.rotation_euler[pyrr.euler.index().yaw] += angle_de_rotation_y*self.profile.get_game_angle_sensibility()
+        self.objs[0].transformation.rotation_euler[pyrr.euler.index().roll] += angle_de_rotation_x*self.profile.get_game_angle_sensibility()/2
+
         if self.profile.get_game_mode() == 0:
-            #Rotation
-            [angle_de_rotation_y,angle_de_rotation_x] = self.mouse_rotation_step()
-            self.objs[0].transformation.rotation_euler[pyrr.euler.index().yaw] += angle_de_rotation_y*self.profile.get_game_angle_sensibility()
-            #self.objs[0].transformation.rotation_euler[pyrr.euler.index().roll] += angle_de_rotation_x*self.profile.get_game_angle_sensibility()/2
 
             #Deplacement 
             if keys_walk[0] in self.touch and self.touch[keys_walk[0]] > 0:
@@ -177,8 +183,11 @@ class ViewerGL:
 
             #Tir
             if self.profile.get_game_shoot() in self.touch and self.touch[self.profile.get_game_shoot()] > 0:
-                self.objects[0].shoot(self.objs, self.objects, size_map= self.profile.get_game_size_map())
-
+                if self.inBullet() == True:
+                    self.objects[0].shoot(self.objs, self.objects, size_map= self.profile.get_game_size_map(), viewer=self, vao=self.get_vao_bullet())
+                else:
+                    self.vao_bullet = self.objects[0].shoot(self.objs, self.objects, size_map= self.profile.get_game_size_map(), viewer=self, vao=None)
+                    
         elif self.profile.get_game_mode() == 1:
             if keys_walk[0] in self.touch and self.touch[keys_walk[0]] > 0:
                self.profile.set_camera_view_position(val=[0,0,-1])
@@ -188,6 +197,12 @@ class ViewerGL:
                 self.profile.set_camera_view_position(val=[-1,0,0])
             if keys_walk[3] in self.touch and self.touch[keys_walk[3]] > 0:
                 self.profile.set_camera_view_position(val=[1,0,0])
+
+    def inBullet(self):
+        for o in self.objects:
+            if isinstance(o, Bullet):
+                return True
+        return False
 
     def mouse_rotation_step(self):
         #x,y = 0,0 en bas a gauche
@@ -233,7 +248,6 @@ class ViewerGL:
     def set_timer(self, val = ''):
         self.timer = val if val != '' else time.time()
 
-
     def start_game(self, program3d_id):
         self.set_program_id(program3d_id)
         self.set_timer()
@@ -241,3 +255,13 @@ class ViewerGL:
         self.set_score()
         cible = Cible(mesh='assets/target.obj', texture='assets/textB1!.png', position = [0,0,10], rot_center = 0.2, scale=[1,1,1,1], rotation=[0,0,np.pi])
         cible.create_add_object(program_id = program3d_id, viewer = self)
+        self.vao_cible = cible.get_vao()
+
+    def get_game(self):
+        return self.profile.get_game()
+
+    def get_vao_cible(self):
+        return self.vao_cible
+
+    def get_vao_bullet(self):
+        return self.vao_bullet
