@@ -70,6 +70,9 @@ class ViewerGL:
                 self.objs[i].value = ' '
                 for i,obj in enumerate(self.objs):
                     GL.glUseProgram(obj.program)
+                    if isinstance(self.objects[i], Bullet):
+                        self.objects[i].movement(self.objs, self.objects, self.get_game_map_size(), self)
+                        
                     if isinstance(obj, Object3D):
                         self.update_camera(obj.program)
                     if self.objects[i] != None and isinstance(self.objects[i], str) == False:
@@ -87,11 +90,24 @@ class ViewerGL:
                 self.objs[i].value = 'Entree pour Rejouer'
                 self.objs[i].draw()
 
+                self.clear_objs()
+
             # changement de buffer d'affichage pour éviter un effet de scintillement
             glfw.swap_buffers(self.window)
             # gestion des évènements
             glfw.poll_events()
+    
+    def clear_objs(self):
+        i = 0
+        while self.firstBullet() != False or self.firstCible() != False:
+            if isinstance(self.objects[i], Bullet) or isinstance(self.objects[i], Cible): 
+                self.objects.pop(i)
+                self.objs.pop(i)
+            else:
+                i += 1
         
+        
+
     def key_callback(self, win, key, scancode, action, mods):
         # sortie du programme si appui sur la touche 'échappement'
         if key == glfw.KEY_ESCAPE and action == glfw.PRESS:
@@ -162,7 +178,7 @@ class ViewerGL:
         [angle_de_rotation_y,angle_de_rotation_x] = self.mouse_rotation_step()
         #self.objs[0].transformation.rotation_euler += [angle_de_rotation_x*self.profile.get_game_angle_sensibility()/2,0,angle_de_rotation_y*self.profile.get_game_angle_sensibility()]
         self.objs[0].transformation.rotation_euler[pyrr.euler.index().yaw] += angle_de_rotation_y*self.profile.get_game_angle_sensibility()
-        self.objs[0].transformation.rotation_euler[pyrr.euler.index().roll] += angle_de_rotation_x*self.profile.get_game_angle_sensibility()/2
+        #self.objs[0].transformation.rotation_euler[pyrr.euler.index().roll] += angle_de_rotation_x*self.profile.get_game_angle_sensibility()/2
 
         if self.profile.get_game_mode() == 0:
 
@@ -183,10 +199,12 @@ class ViewerGL:
 
             #Tir
             if self.profile.get_game_shoot() in self.touch and self.touch[self.profile.get_game_shoot()] > 0:
-                if self.inBullet() == True:
+                vao = self.firstBullet()
+                if vao != False:
                     self.objects[0].shoot(self.objs, self.objects, size_map= self.profile.get_game_size_map(), viewer=self, vao=self.get_vao_bullet())
                 else:
-                    self.vao_bullet = self.objects[0].shoot(self.objs, self.objects, size_map= self.profile.get_game_size_map(), viewer=self, vao=None)
+                    self.objects[0].shoot(self.objs, self.objects, size_map= self.profile.get_game_size_map(), viewer=self, vao=None)
+                    self.vao_bullet = vao
                     
         elif self.profile.get_game_mode() == 1:
             if keys_walk[0] in self.touch and self.touch[keys_walk[0]] > 0:
@@ -198,11 +216,18 @@ class ViewerGL:
             if keys_walk[3] in self.touch and self.touch[keys_walk[3]] > 0:
                 self.profile.set_camera_view_position(val=[1,0,0])
 
-    def inBullet(self):
+    def firstBullet(self):
         for o in self.objects:
             if isinstance(o, Bullet):
-                return True
+                return o.get_vao()
         return False
+
+    def firstCible(self):
+        for o in self.objects:
+            if isinstance(o, Cible):
+                return o.get_vao()
+        return False
+
 
     def mouse_rotation_step(self):
         #x,y = 0,0 en bas a gauche
