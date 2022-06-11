@@ -199,12 +199,8 @@ class ViewerGL:
 
             #Tir
             if self.profile.get_game_shoot() in self.touch and self.touch[self.profile.get_game_shoot()] > 0:
-                vao = self.firstBullet()
-                if vao != False:
-                    self.objects[0].shoot(self.objs, self.objects, size_map= self.profile.get_game_size_map(), viewer=self, vao=self.get_vao_bullet())
-                else:
-                    self.objects[0].shoot(self.objs, self.objects, size_map= self.profile.get_game_size_map(), viewer=self, vao=None)
-                    self.vao_bullet = vao
+                self.objects[0].shoot(self.objs, self.objects, size_map= self.profile.get_game_size_map(), viewer=self, vao=self.get_vao_bullet())
+
                     
         elif self.profile.get_game_mode() == 1:
             if keys_walk[0] in self.touch and self.touch[keys_walk[0]] > 0:
@@ -280,7 +276,11 @@ class ViewerGL:
         self.set_score()
         cible = Cible(mesh='assets/target.obj', texture='assets/textB1!.png', position = [0,0,10], rot_center = 0.2, scale=[1,1,1,1], rotation=[0,0,np.pi])
         cible.create_add_object(program_id = program3d_id, viewer = self)
+
+        bullet = Bullet(mesh='assets/bullet.obj', texture='assets/Solid_white_hd.png', position = [10,10,10], rot_center = 0.2, scale=[0,0,0,1])
+        bullet.create_add_object(program_id = program3d_id, viewer = self)
         self.vao_cible = cible.get_vao()
+        self.vao_bullet = bullet.get_vao()
 
     def get_game(self):
         return self.profile.get_game()

@@ -23,6 +23,7 @@ class Load_Object:
         self.viewer = None
         self.program_id = None
 
+
     def get_vao(self):
         return self.vao
     
@@ -109,7 +110,7 @@ class Bullet(Load_Object):
         self.object.transformation.rotation_euler[pyrr.euler.index().roll] += i[0]
 
     def movement(self, objs, objs_global, size_map, viewer):
-        [x,y,z] = self.get_position()
+        [x,y,z] = self.centre_gravite()
 
         
         vecteur_translation = pyrr.Vector3([0, 0, self.bullet_speed])
@@ -122,7 +123,7 @@ class Bullet(Load_Object):
                 pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_eulers(self.object.transformation.rotation_euler), vecteur_translation)
             for obj in objs_global:
                 if type(obj) == Cible:
-                    dist_euclidienne = np.linalg.norm(self.get_position()-obj.get_position())
+                    dist_euclidienne = np.linalg.norm(self.get_position()-obj.centre_gravite())
                     if dist_euclidienne < 1:
                         obj.hit(objs, objs_global) #On renvoie vers la fonction de touchage de cible
                         self.object.visible = False #Supprime la balle
