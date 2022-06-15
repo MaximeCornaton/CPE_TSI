@@ -6,7 +6,7 @@ from cpe3d import Transformation3D, Object3D
 import numpy as np
 
 class Load_Object:
-    def __init__(self, mesh='assets/icosphere.obj', texture='assets/Solid_white_hd.png', position = [0,2,0], rot_center = 0.2, scale=[1,1,1,1], weight = 5, ymin = 2,rotation = [0,0,0], vao=None,  ):
+    def __init__(self, mesh='assets/icosphere.obj', texture='assets/Solid_white_hd.png', position = [0,2,0], rot_center = 0.0, scale=[1,1,1,1], weight = 5, ymin = 2,rotation = [0,0,0], vao=None,  ):
         self.weight = weight
         self.ymin = ymin
 
@@ -38,10 +38,12 @@ class Load_Object:
         tr.translation.x += position[0]
         tr.translation.y += position[1]
         tr.translation.z += position[2]
-        tr.rotation_euler[0] += rotation[0]
-        tr.rotation_euler[1] += rotation[1]
-        tr.rotation_euler[2] += rotation[2]
-        tr.rotation_center.z = rot_center 
+        tr.rotation_euler[0] = rotation[0]
+        tr.rotation_euler[1] = rotation[1]
+        tr.rotation_euler[2] = rotation[2]
+        tr.rotation_center.z = rot_center
+        tr.rotation_center.x = 0.0
+        tr.rotation_center.y = 0.0
         return tr
         
     def get_mesh(self):

@@ -165,9 +165,9 @@ class ViewerGL:
         #x,y,z parametre de positionnement de la camera par rapport a l'objet
         [x_distance, y_distance, z_distance] = self.profile.get_camera_view_position()
         self.cam.transformation.rotation_euler = self.objs[0].transformation.rotation_euler.copy() 
-        self.cam.transformation.rotation_euler[pyrr.euler.index().yaw] += np.pi #On met la camera derriere l'objet
+        self.cam.transformation.rotation_euler[pyrr.euler.index().yaw] -= np.pi #On met la camera derriere l'objet
         self.cam.transformation.rotation_euler[pyrr.euler.index().roll] = -self.cam.transformation.rotation_euler[pyrr.euler.index().roll]
-        self.cam.transformation.rotation_euler[pyrr.euler.index().pitch] = 0
+        #self.cam.transformation.rotation_euler[pyrr.euler.index().pitch] = 0
         self.cam.transformation.rotation_center = self.objs[0].transformation.translation + self.objs[0].transformation.rotation_center #On met a jour le centre de rotation
         self.cam.transformation.translation = self.objs[0].transformation.translation + pyrr.Vector3([x_distance, y_distance, z_distance]) #On met a jour le placement
 
@@ -179,22 +179,27 @@ class ViewerGL:
         #self.objs[0].transformation.rotation_euler += [angle_de_rotation_x*self.profile.get_game_angle_sensibility()/2,0,angle_de_rotation_y*self.profile.get_game_angle_sensibility()]
         self.objs[0].transformation.rotation_euler[pyrr.euler.index().yaw] += angle_de_rotation_y*self.profile.get_game_angle_sensibility()
         #self.objs[0].transformation.rotation_euler[pyrr.euler.index().roll] += angle_de_rotation_x*self.profile.get_game_angle_sensibility()/2
+        self.objs[0].transformation.rotation_euler[pyrr.euler.index().pitch] = 0
+        #print(self.objs[0].transformation.rotation_euler)
 
         if self.profile.get_game_mode() == 0:
-
+            
             #Deplacement 
             if keys_walk[0] in self.touch and self.touch[keys_walk[0]] > 0:
                 self.objs[0].transformation.translation += \
-                    pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_eulers(self.objs[0].transformation.rotation_euler), pyrr.Vector3([0, 0, self.profile.get_game_distance_step()]))
+                pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_y_rotation(self.objs[0].transformation.rotation_euler[pyrr.euler.index().yaw]), pyrr.Vector3([0, 0, self.profile.get_game_distance_step()]))
+
             if keys_walk[1] in self.touch and self.touch[keys_walk[1]] > 0:
                 self.objs[0].transformation.translation -= \
-                    pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_eulers(self.objs[0].transformation.rotation_euler), pyrr.Vector3([0, 0, self.profile.get_game_distance_step()]))
+                pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_y_rotation(self.objs[0].transformation.rotation_euler[pyrr.euler.index().yaw]), pyrr.Vector3([0, 0, self.profile.get_game_distance_step()]))
+            
             if keys_walk[2] in self.touch and self.touch[keys_walk[2]] > 0:
                 self.objs[0].transformation.translation += \
-                    pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_eulers(self.objs[0].transformation.rotation_euler), pyrr.Vector3([self.profile.get_game_distance_step(), 0, 0]))
+                    pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_y_rotation(self.objs[0].transformation.rotation_euler[pyrr.euler.index().yaw]), pyrr.Vector3([self.profile.get_game_distance_step(), 0, 0]))
+            
             if keys_walk[3] in self.touch and self.touch[keys_walk[3]] > 0:
                 self.objs[0].transformation.translation -= \
-                    pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_eulers(self.objs[0].transformation.rotation_euler), pyrr.Vector3([self.profile.get_game_distance_step(), 0, 0]))
+                    pyrr.matrix33.apply_to_vector(pyrr.matrix33.create_from_y_rotation(self.objs[0].transformation.rotation_euler[pyrr.euler.index().yaw]), pyrr.Vector3([self.profile.get_game_distance_step(), 0, 0]))
             
 
             #Tir
@@ -226,7 +231,7 @@ class ViewerGL:
 
 
     def mouse_rotation_step(self):
-        #x,y = 0,0 en bas a gauche
+        #x,y = 0,0 en haut a gauche
         (x_cursor,y_cursor) = glfw.get_cursor_pos(self.window)
         rapport_de_rotation_largeur = 0
         rapport_de_rotation_hauteur = 0
@@ -235,15 +240,15 @@ class ViewerGL:
         
         if 0<x_cursor<width and 0<y_cursor<height:
             tour = np.pi*2
-
             rapport_de_rotation_largeur = tour*x_cursor/width
             rapport_de_rotation_hauteur = tour*y_cursor/height
-
+            
             #On centre le rapport:
             rapport_de_rotation_largeur = rapport_de_rotation_largeur-tour/2
             rapport_de_rotation_hauteur = rapport_de_rotation_hauteur-tour/2
         
         glfw.set_cursor_pos(self.window, width/2, height/2)
+        
         return rapport_de_rotation_largeur, -rapport_de_rotation_hauteur
 
 
