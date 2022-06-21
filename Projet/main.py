@@ -10,7 +10,6 @@ def main():
     viewer = ViewerGL()
 
     viewer.set_camera(Camera())
-    viewer.cam.transformation.translation.y = 2
     viewer.cam.transformation.rotation_center = viewer.cam.transformation.translation.copy()
 
     program3d_id = glutils.create_program_from_file('shader.vert', 'shader.frag')
@@ -38,7 +37,7 @@ def main():
     texture = glutils.load_texture('assets/fontB.jpg')
     crosshair_width_12 = viewer.profile.get_game_crosshair_width()/2
     o = Text('+', np.array([-crosshair_width_12,-crosshair_width_12], np.float32), np.array([crosshair_width_12, crosshair_width_12], np.float32), vao, 2, programGUI_id, texture)
-    viewer.add_object(o, 'Floor')
+    viewer.add_object(o, 'Crosshair')
 
     vao = Text.initalize_geometry()
     texture = glutils.load_texture('assets/fontB.jpg')

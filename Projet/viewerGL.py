@@ -182,7 +182,7 @@ class ViewerGL:
         self.objs[0].transformation.rotation_euler[pyrr.euler.index().pitch] = 0
         #print(self.objs[0].transformation.rotation_euler)
 
-        if self.profile.get_game_mode() == 0:
+        if self.profile.get_game_mode() == 0: #mode de jeu
             
             #Deplacement 
             if keys_walk[0] in self.touch and self.touch[keys_walk[0]] > 0:
@@ -207,7 +207,7 @@ class ViewerGL:
                 self.objects[0].shoot(self.objs, self.objects, size_map= self.profile.get_game_size_map(), viewer=self, vao=self.get_vao_bullet())
 
                     
-        elif self.profile.get_game_mode() == 1:
+        elif self.profile.get_game_mode() == 1: #mode libre
             if keys_walk[0] in self.touch and self.touch[keys_walk[0]] > 0:
                self.profile.set_camera_view_position(val=[0,0,-1])
             if keys_walk[1] in self.touch and self.touch[keys_walk[1]] > 0:
@@ -281,7 +281,9 @@ class ViewerGL:
         self.set_score()
         cible = Cible(mesh='assets/target.obj', texture='assets/textB1!.png', position = [0,0,10], rot_center = 0.2, scale=[1,1,1,1], rotation=[0,0,np.pi])
         cible.create_add_object(program_id = program3d_id, viewer = self)
-
+        self.objects[0].transformation.translation.x = 0
+        self.objects[0].transformation.translation.y = 0
+        self.objects[0].transformation.translation.z = 0
         bullet = Bullet(mesh='assets/bullet.obj', texture='assets/Solid_white_hd.png', position = [10,10,10], rot_center = 0.2, scale=[0,0,0,1])
         bullet.create_add_object(program_id = program3d_id, viewer = self)
         self.vao_cible = cible.get_vao()
